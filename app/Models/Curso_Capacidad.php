@@ -15,6 +15,7 @@ class Curso_Capacidad extends Model
         return $this->hasOne(Curso::class, 'idCurso', 'idCurso');
     }
 
+    
     public function capacidad(){
         return $this->hasOne(Capacidad::class, 'idCapacidad', 'idCapacidad');
     }
