@@ -104,6 +104,7 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th>Código</th>
                                 <th>Descripción</th>
                                 <th>Periodo</th>
                                 <th>Tipo ciclo</th>
@@ -119,6 +120,7 @@
                         <tbody>
                             @foreach ($examenes as $examen)
                                 <tr>
+                                    <td>{{ $examen->idexamen }}</td>
                                     <td>{{ $examen->descripcion }}</td>
                                     <td>{{ $examen->aula->ciclo->idperiodo }}</td>
                                     <td>{{ $examen->aula->ciclo->tipo_ciclo->descripcion }}</td>
