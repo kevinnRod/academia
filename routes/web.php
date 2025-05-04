@@ -28,6 +28,7 @@ use App\Http\Controllers\CatedraController;
 use App\Http\Controllers\TipoExamenController;
 use App\Http\Controllers\ExamenController;
 use App\Http\Controllers\NotaExamenController;
+use App\Http\Controllers\RespuestaCorrectaController;
 
 
 
@@ -267,3 +268,5 @@ Route::get('/cargar-alumnos/{cicloId}/{aulaId}', [AlumnoController::class, 'carg
 
 
 Route::post('/notaExamen/generar-pdf/{dniAlumno}', [NotaExamenController::class, 'generarPdf'])->name('notaExamen.generarPdf');
+Route::get('/examen/{id}/respuestas-correctas', [RespuestaCorrectaController::class, 'editPorExamen'])->name('respuestas_correctas.edit');
+Route::put('/examen/{id}/respuestas-correctas', [RespuestaCorrectaController::class, 'updatePorExamen'])->name('respuestas_correctas.updatePorExamen');

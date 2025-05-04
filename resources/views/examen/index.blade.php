@@ -130,6 +130,11 @@
                                     <td>{{ $examen->estado == 1 ? 'Activo' : 'Inactivo' }}</td>
                                     <td class="text-end">
                                         <a href="{{ route('examen.edit', $examen->idexamen) }}" class="btn btn-sm btn-primary">Editar</a>
+
+                                        <a href="{{ route('respuestas_correctas.edit', $examen->idexamen) }}" class="btn btn-sm btn-success">
+                                            Respuestas
+                                        </a>
+
                                         <form action="{{ route('examen.confirmar', $examen->idexamen) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('GET')

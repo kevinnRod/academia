@@ -27,7 +27,12 @@ class Examen extends Model
     {
         return $this->hasMany(NotaExamen::class, 'idexamen', 'idexamen');
     }
-
+    
+    public function respuestasCorrectas()
+    {
+        return $this->hasMany(RespuestaCorrecta::class, 'id_examen');
+    }
+    
 
 
 }
