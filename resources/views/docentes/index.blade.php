@@ -73,9 +73,10 @@
                                     <td>{{$itemdocente->telefono}}</td>
                                     <td>{{$itemdocente->fechaIngreso}}</td>
                                     <td>
-                                    <a href="{{ asset($itemdocente->featured) }}" data-fancybox="gallery" data-caption="Foto del docente">
-                                        <img src="{{ asset($itemdocente->featured) }}" alt="Foto del docente" class="img-fluid" width="120px">
-                                    </a>
+                                        <a href="{{ $itemdocente->featured_sas_url }}" data-fancybox="gallery" data-caption="Foto del docente">
+                                            <img src="{{ $itemdocente->featured_sas_url }}" alt="Foto del docente" class="img-fluid" width="120px">
+                                        </a>
+                                        
                                     </td>
                                     <td>
                                         <a href="{{ route('docentes.edit', $itemdocente->codDocente) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i> Editar</a>

@@ -8,6 +8,9 @@ use App\Models\EstadoCivil;
 use App\Models\Nivel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use MicrosoftAzure\Storage\Blob\BlobRestProxy;
+use MicrosoftAzure\Storage\Blob\Models\SharedAccessBlobPermissions;
+use MicrosoftAzure\Storage\Common\Models\SharedAccessSignatureHelper;
 
 class DocenteController extends Controller
 {
@@ -39,50 +42,50 @@ class DocenteController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $idperiodo = session('periodoSeleccionado');
-
-    // Validar los datos del formulario, incluida la imagen
-    $data = request()->validate([
-        'apellidos' => 'required',
-        'nombres' => 'required',
-        'direccion' => 'required',
-        'telefono' => 'required',
-        'idEstadoCivil' => 'required',
-        'fechaIngreso' => 'required',
-        'featured' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', 
-    ],
-    [
-        'apellidos.required' => 'Ingrese apellidos del docente',
-        'nombres.required' => 'Ingrese nombre del docente',
-        'direccion.required' => 'Ingrese dirección del docente',
-        'telefono.required' => 'Ingrese teléfono del docente',
-        'idEstadoCivil.required' => 'Ingrese el estado civil del docente',
-        'fechaIngreso.required' => 'Ingrese la fecha de ingreso del docente',
-        'featured.required' => 'Seleccione una imagen',
-        'featured.image' => 'El archivo debe ser una imagen',
-        'featured.mimes' => 'El archivo debe ser de tipo: jpeg, png, jpg, gif o svg',
-        'featured.max' => 'El tamaño máximo de la imagen es de 2MB',
-    ]);
-    if ($request->hasFile('featured')) {
-        $file = $request->file('featured');
-        $destinationPath = 'images/featureds/';
-        $filename = time() . '-' . $file->getClientOriginalName();
-        $uploadSuccess = $file->move($destinationPath, $filename);
-        $data['featured'] = $destinationPath . $filename; // Guardar la ruta de la imagen
-
+    {
+        $idperiodo = session('periodoSeleccionado');
+    
+        $data = $request->validate([
+            'apellidos' => 'required',
+            'nombres' => 'required',
+            'direccion' => 'required',
+            'telefono' => 'required',
+            'idEstadoCivil' => 'required',
+            'fechaIngreso' => 'required',
+            'featured' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ], [
+            'apellidos.required' => 'Ingrese apellidos del docente',
+            'nombres.required' => 'Ingrese nombre del docente',
+            'direccion.required' => 'Ingrese dirección del docente',
+            'telefono.required' => 'Ingrese teléfono del docente',
+            'idEstadoCivil.required' => 'Ingrese el estado civil del docente',
+            'fechaIngreso.required' => 'Ingrese la fecha de ingreso del docente',
+            'featured.required' => 'Seleccione una imagen',
+            'featured.image' => 'El archivo debe ser una imagen',
+            'featured.mimes' => 'El archivo debe ser de tipo: jpeg, png, jpg, gif o svg',
+            'featured.max' => 'El tamaño máximo de la imagen es de 2MB',
+        ]);
+    
+        if ($request->hasFile('featured')) {
+            $file = $request->file('featured');
+            $filename = time() . '-' . $file->getClientOriginalName();
+            $ruta = 'docentes/' . $filename;
+    
+            // Subir a Azure Blob Storage (contenedor privado)
+            Storage::disk('azure')->put($ruta, fopen($file, 'r+'));
+    
+            // Guardar solo la ruta relativa (NO la URL completa)
+            $data['featured'] = $ruta;
+        }
+    
+        $docente = new Docente($data);
+        $docente->estado = '1';
+        $docente->idnivel = '1';
+        $docente->idperiodo = '2025-II';
+        $docente->save();
+    
+        return redirect()->route('docentes.index')->with('datos', 'Registro Nuevo Guardado...!');
     }
-
-    // Crear una instancia de Docente y guardar los datos en la base de datos
-    $docente = new Docente($data);
-    $docente->estado = '1';
-    $docente->idnivel = '1';
-    $docente->idperiodo = '2025-II';
-    $docente->save();
-
-    // Redireccionar al usuario a la página de índice de docentes con un mensaje de éxito
-    return redirect()->route('docentes.index')->with('datos', 'Registro Nuevo Guardado...!');
-}
 
 
     /**
@@ -109,59 +112,53 @@ class DocenteController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Validar los datos del formulario
         $data = $request->validate([
             'apellidos' => 'required',
             'nombres' => 'required',
             'direccion' => 'required',
             'telefono' => 'required',
-            'featured' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validar la imagen
+            'idEstadoCivil' => 'required',
+            'fechaIngreso' => 'required',
+            'idNivel' => 'required',
+            'featured' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
             'apellidos.required' => 'Ingrese apellidos del docente',
             'nombres.required' => 'Ingrese nombre del docente',
             'direccion.required' => 'Ingrese dirección del docente',
             'telefono.required' => 'Ingrese teléfono del docente',
+            'idEstadoCivil.required' => 'Ingrese el estado civil del docente',
+            'fechaIngreso.required' => 'Ingrese la fecha de ingreso del docente',
+            'idNivel.required' => 'Seleccione el nivel',
             'featured.image' => 'El archivo debe ser una imagen',
             'featured.mimes' => 'El archivo debe ser de tipo: jpeg, png, jpg, gif o svg',
             'featured.max' => 'El tamaño máximo de la imagen es de 2MB',
         ]);
-    
-        // Encontrar al docente por su ID
+
         $docente = Docente::findOrFail($id);
-    
-        // Asignar los nuevos valores a las propiedades del docente
-        $docente->apellidos = $request->apellidos;
-        $docente->nombres = $request->nombres;
-        $docente->direccion = $request->direccion;
-        $docente->idEstadoCivil = $request->idEstadoCivil; // Asegúrate de que esta propiedad exista en tu modelo Docente
-        $docente->telefono = $request->telefono;
-        $docente->fechaIngreso = $request->fechaIngreso;
-        $docente->idNivel = $request->idNivel; // Asegúrate de que esta propiedad exista en tu modelo Docente
-    
-        // Procesar la nueva imagen si se proporciona
+
+        // Actualizar atributos
+        $docente->fill($data);
+
+        // Procesar nueva imagen
         if ($request->hasFile('featured')) {
             $file = $request->file('featured');
-            $destinationPath = 'images/featureds/';
             $filename = time() . '-' . $file->getClientOriginalName();
-            $uploadSuccess = $file->move($destinationPath, $filename);
-            if ($uploadSuccess) {
-                // Verificar si hay una imagen anterior y eliminarla
-                if ($docente->featured) {
-                    $oldFilePath = public_path($docente->featured);
-                    if (file_exists($oldFilePath)) {
-                        unlink($oldFilePath);
-                    }
-                }
-                // Actualizar la referencia de la imagen en la base de datos con la nueva ruta
-                $docente->featured = $destinationPath . $filename;
+            $ruta = 'docentes/' . $filename;
+
+            // Eliminar la imagen anterior si existe
+            if ($docente->featured && Storage::disk('azure')->exists($docente->featured)) {
+                Storage::disk('azure')->delete($docente->featured);
             }
+
+            // Subir nueva imagen
+            Storage::disk('azure')->put($ruta, fopen($file, 'r+'));
+
+            // Guardar solo la ruta relativa
+            $docente->featured = $ruta;
         }
 
-    
-        // Guardar los cambios en la base de datos
         $docente->save();
-        
-        // Redireccionar al usuario a la página de índice de docentes con un mensaje de éxito
+
         return redirect()->route('docentes.index')->with('datos', 'Registro Actualizado...!');
     }
     
