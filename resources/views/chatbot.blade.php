@@ -1,6 +1,6 @@
 @extends('layouts.plantilla') {{-- Usa tu layout base si tienes uno --}}
 
-@section('content')
+@section('contenido')
 <div class="container">
     <h2>Generador de Exámenes con IA</h2>
 
