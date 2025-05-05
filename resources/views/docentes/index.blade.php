@@ -49,7 +49,6 @@
                                     <th class="border-top-0">Apeliidos</th>
                                     <th class="border-top-0">Nombres</th>
                                     <th class="border-top-0">Direccion</th>
-                                    <th class="border-top-0">Estado Civil</th>
                                     <th class="border-top-0">Telefono</th>
                                     <th class="border-top-0">Ingreso</th>
                                     <th class="border-top-0">Foto</th>
@@ -69,7 +68,6 @@
                                     <td>{{$itemdocente->apellidos}}</td>
                                     <td>{{$itemdocente->nombres}}</td>
                                     <td>{{$itemdocente->direccion}}</td>
-                                    <td>{{$itemdocente->estadoCivil->estadoCivil}}</td>
                                     <td>{{$itemdocente->telefono}}</td>
                                     <td>{{$itemdocente->fechaIngreso}}</td>
                                     <td>

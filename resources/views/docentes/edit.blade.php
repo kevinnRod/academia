@@ -60,20 +60,7 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col form-group">
-                                <label class="col-md-12 mb-0">Estado Civil</label>
-                                <div class="col-sm-12 border-bottom">
-                                    <select class="form-select shadow-none ps-0 border-0 form-control-line" id="idEstadoCivil" name="idEstadoCivil">
-                                        @foreach ($estadosCivil as $itemestadosCivil)
-                                        @if ($docente->idEstadoCivil == $itemestadosCivil->idEstadoCivil)
-                                            <option value="{{$itemestadosCivil->idEstadoCivil}}" selected>{{$itemestadosCivil->estadoCivil}}</option>
-                                        @else
-                                            <option value="{{$itemestadosCivil->idEstadoCivil}}">{{$itemestadosCivil->estadoCivil}}</option>
-                                        @endif
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+
                             <div class="col form-group">
                                 <label class="col-md-12 mb-0">Telefono</label>
                                 <div class="col-md-12">

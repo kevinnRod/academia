@@ -33,9 +33,8 @@ class DocenteController extends Controller
      */
     public function create()
     {
-        $estadosCivil=EstadoCivil::all();
         $niveles=Nivel::all();
-        return view('docentes.create', compact('niveles', 'estadosCivil'));
+        return view('docentes.create', compact('niveles'));
     }
 
     /**
@@ -50,7 +49,6 @@ class DocenteController extends Controller
             'nombres' => 'required',
             'direccion' => 'required',
             'telefono' => 'required',
-            'idEstadoCivil' => 'required',
             'fechaIngreso' => 'required',
             'featured' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
@@ -58,7 +56,6 @@ class DocenteController extends Controller
             'nombres.required' => 'Ingrese nombre del docente',
             'direccion.required' => 'Ingrese dirección del docente',
             'telefono.required' => 'Ingrese teléfono del docente',
-            'idEstadoCivil.required' => 'Ingrese el estado civil del docente',
             'fechaIngreso.required' => 'Ingrese la fecha de ingreso del docente',
             'featured.required' => 'Seleccione una imagen',
             'featured.image' => 'El archivo debe ser una imagen',
@@ -103,8 +100,7 @@ class DocenteController extends Controller
     {
         $docente=Docente::findOrFail($id);
         $niveles=Nivel::all();
-        $estadosCivil=EstadoCivil::all();
-        return view('docentes.edit',compact('docente', 'niveles', 'estadosCivil'));
+        return view('docentes.edit',compact('docente', 'niveles'));
     }
 
     /**
@@ -117,7 +113,6 @@ class DocenteController extends Controller
             'nombres' => 'required',
             'direccion' => 'required',
             'telefono' => 'required',
-            'idEstadoCivil' => 'required',
             'fechaIngreso' => 'required',
             'idNivel' => 'required',
             'featured' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -126,7 +121,6 @@ class DocenteController extends Controller
             'nombres.required' => 'Ingrese nombre del docente',
             'direccion.required' => 'Ingrese dirección del docente',
             'telefono.required' => 'Ingrese teléfono del docente',
-            'idEstadoCivil.required' => 'Ingrese el estado civil del docente',
             'fechaIngreso.required' => 'Ingrese la fecha de ingreso del docente',
             'idNivel.required' => 'Seleccione el nivel',
             'featured.image' => 'El archivo debe ser una imagen',

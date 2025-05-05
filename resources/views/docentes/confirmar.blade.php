@@ -42,12 +42,7 @@
                                 <input type="text" id="direccion" name="direccion" class="form-control ps-0 form-control-line" value="{{ $docente->direccion }}" disabled>
                             </div>
                         </div>
-                        <div class="col form-group">
-                            <label class="col-md-12 mb-0">Estado Civil</label>
-                            <div class="col-md-12">
-                                <input type="text" id="estadoCivil" name="estadoCivil" class="form-control ps-0 form-control-line" value="{{ $docente->estadoCivil->estadoCivil }}" disabled>
-                            </div>
-                        </div>
+
                         <div class="col form-group">
                             <label class="col-md-12 mb-0">Telefono</label>
                             <div class="col-md-12">
