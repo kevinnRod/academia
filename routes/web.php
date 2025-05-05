@@ -276,4 +276,4 @@ Route::get('/chat-examen', function () {
     return view('chatbot');
 });
 
-Route::post('/generar-preguntas', [ExamenIAController::class, 'generarPreguntas'])->middleware('auth');
+Route::post('/generar-preguntas', [ExamenIAController::class, 'generarPreguntas']);

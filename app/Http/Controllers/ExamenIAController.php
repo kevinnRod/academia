@@ -13,22 +13,33 @@ class ExamenIAController extends Controller
         $tema = $request->input('tema'); 
         $curso = $request->input('curso');
         
-        $prompt = "Genera 5 preguntas tipo alternativa para un examen del curso {$curso}, sobre el tema {$tema}, incluyendo la respuesta correcta y tres alternativas incorrectas.";
-    
-        $response = Http::withHeaders([
-            'api-key' => env('AZURE_OPENAI_KEY'),
+        $prompt = "Genera 5 preguntas tipo alternativa para un examen del curso {$curso}, sobre el tema {$tema}, incluyendo la respuesta correcta y tres alternativas incorrectas. Devuelve las preguntas en un array JSON, cada objeto debe tener 'pregunta', 'opciones' y 'respuesta_correcta'.";
+        
+        $response = Http::withOptions([
+            'verify' => false, 
+        ])->withHeaders([
+            'api-key' => '91Ah3SlCpQaNw8yT164PyCnjBzp5wXInu3kUeni4c9p0xqehgdGyJQQJ99BEACHYHv6XJ3w3AAAAACOGwl90',
             'Content-Type' => 'application/json',
-        ])->post(env('AZURE_OPENAI_ENDPOINT') . '/openai/deployments/' . env('AZURE_OPENAI_DEPLOYMENT') . '/chat/completions?api-version=2024-02-15-preview', [
+        ])->post('https://ssama-maaza93a-eastus2.cognitiveservices.azure.com/' . '/openai/deployments/' . 'o3-mini' . '/chat/completions?api-version=2024-12-01-preview', [
             'messages' => [
-                ['role' => 'system', 'content' => 'Eres un generador de exámenes. Devuelve las preguntas en formato JSON.'],
+                ['role' => 'system', 'content' => 'Eres un generador de exámenes. Devuelve las preguntas en formato JSON válido. Devuelve 5 preguntas en español, que sean de opciones múltiples'],
                 ['role' => 'user', 'content' => $prompt],
             ],
-            'temperature' => 0.5,
-            'max_tokens' => 1000,
         ]);
     
         $data = $response->json();
+        $content = $data['choices'][0]['message']['content'] ?? '';
     
-        return response()->json($data['choices'][0]['message']['content']);
+        $jsonDecoded = json_decode($content, true);
+    
+        // if (json_last_error() !== JSON_ERROR_NONE) {
+        //     return response()->json([
+        //         'error' => 'Error al decodificar el JSON generado por la IA.',
+        //         'content' => $content,
+        //     ], 500);
+        // }
+    
+        return response()->json($data);
     }
-    }
+    
+}

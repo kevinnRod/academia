@@ -33,16 +33,45 @@
 
         chat.innerHTML += `<div><strong>Tú:</strong> Curso: ${curso}, Tema: ${tema}</div>`;
 
-        try {
-            const response = await axios.post('/generar-preguntas', {
-                curso: curso,
-                tema: tema
-            });
+        axios.post('/generar-preguntas', {
+            curso: curso,
+            tema: tema
+        })
+        .then(function (response) {
+    const contenido = response.data.choices[0].message.content;
 
-            chat.innerHTML += `<div style="white-space: pre-wrap;"><strong>IA:</strong> ${response.data}</div>`;
-        } catch (error) {
+    let preguntas;
+
+    try {
+        preguntas = JSON.parse(contenido); // convierte string JSON a array
+    } catch (e) {
+        chat.innerHTML += `<div><strong>IA:</strong> Error al interpretar la respuesta como JSON.</div>`;
+        console.error("JSON mal formado:", contenido);
+        return;
+    }
+
+    let contenidoFormateado = '<strong>IA:</strong><br><br>';
+
+    preguntas.forEach((preguntaObj, index) => {
+        contenidoFormateado += `<strong>${index + 1}. ${preguntaObj.pregunta}</strong><br>`;
+        preguntaObj.opciones.forEach((opcion, i) => {
+            const letra = String.fromCharCode(65 + i); // A, B, C, D
+            contenidoFormateado += `${letra}) ${opcion}<br>`;
+        });
+        contenidoFormateado += `<em>Respuesta correcta:</em> ${preguntaObj.respuesta_correcta}<br><br>`;
+    });
+
+    chat.innerHTML += `<div class="msg bot">${contenidoFormateado}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+
+    console.log(preguntas);
+})
+
+        .catch(function (error) {
             chat.innerHTML += `<div><strong>IA:</strong> Ocurrió un error al generar preguntas.</div>`;
-        }
+            console.error(error); // Muestra el error completo en consola
+        });
+
 
         chat.scrollTop = chat.scrollHeight;
     });
