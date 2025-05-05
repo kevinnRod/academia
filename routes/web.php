@@ -29,6 +29,7 @@ use App\Http\Controllers\TipoExamenController;
 use App\Http\Controllers\ExamenController;
 use App\Http\Controllers\NotaExamenController;
 use App\Http\Controllers\RespuestaCorrectaController;
+use App\Http\Controllers\ExamenIAController;
 
 
 
@@ -270,3 +271,9 @@ Route::get('/cargar-alumnos/{cicloId}/{aulaId}', [AlumnoController::class, 'carg
 Route::post('/notaExamen/generar-pdf/{dniAlumno}', [NotaExamenController::class, 'generarPdf'])->name('notaExamen.generarPdf');
 Route::get('/examen/{id}/respuestas-correctas', [RespuestaCorrectaController::class, 'editPorExamen'])->name('respuestas_correctas.edit');
 Route::put('/examen/{id}/respuestas-correctas', [RespuestaCorrectaController::class, 'updatePorExamen'])->name('respuestas_correctas.updatePorExamen');
+
+Route::get('/chat-examen', function () {
+    return view('chatbot');
+});
+
+Route::post('/generar-preguntas', [ExamenIAController::class, 'generarPreguntas'])->middleware('auth');

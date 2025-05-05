@@ -10,7 +10,7 @@ class ExamenIAController extends Controller
 
     public function generarPreguntas(Request $request)
     {
-        $tema = $request->input('tema'); // Ej: "Middleware en Laravel"
+        $tema = $request->input('tema'); 
         $curso = $request->input('curso');
         
         $prompt = "Genera 5 preguntas tipo alternativa para un examen del curso {$curso}, sobre el tema {$tema}, incluyendo la respuesta correcta y tres alternativas incorrectas.";
