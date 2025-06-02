@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class MatriculaController extends Controller
 {
@@ -242,14 +243,13 @@ class MatriculaController extends Controller
 
     if ($request->hasFile('rutaImagen')) {
         $file = $request->file('rutaImagen');
-        $destinationPath = 'images/pagos/';
-        $filename = time() . '-' . $file->getClientOriginalName();
-        $uploadSuccess = $file->move($destinationPath, $filename);
-        
-        // Verificar si la foto se cargó correctamente antes de guardar la ruta en la base de datos
-        if ($uploadSuccess) {
-            $pago->rutaImagen = $destinationPath . $filename;
-        }
+        $filename = 'pagos/' . time() . '-' . $file->getClientOriginalName();
+    
+        // Subida privada (sin opción 'public')
+        Storage::disk('s3')->put($filename, file_get_contents($file));
+    
+        // Guarda la ruta en BD (sin URL)
+        $pago->rutaImagen = $filename;
     }
 
 

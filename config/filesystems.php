@@ -43,15 +43,6 @@ return [
             'visibility' => 'public',
             'throw' => false,
         ],
-
-        'azure' => [
-            'driver'    => 'azure',
-            'name'      => env('AZURE_STORAGE_NAME'),
-            'key'       => env('AZURE_STORAGE_KEY'),
-            'container' => env('AZURE_STORAGE_CONTAINER'),
-            'url'       => env('AZURE_STORAGE_URL'),
-        ],
-
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
