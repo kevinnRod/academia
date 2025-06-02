@@ -40,7 +40,36 @@
          .then(function (response) {
         // 1) Aquí “response.data” ya es directamente el arreglo de preguntas,
         //    NO tienes que ir a response.data.choices[...] ni extraer .message.content.
-        const preguntas = response.data;
+       let contenido = response.data.generation;
+
+// Extrae el JSON desde el string, quitando `print(` y las comillas triples, si existen
+// Intenta detectar si hay un `print(` y extraer solo el contenido entre comillas
+
+const jsonRegex = /print\(['"](.+)['"]\)/s;
+const match = contenido.match(jsonRegex);
+
+if (match && match[1]) {
+    contenido = match[1];
+}
+
+// Intenta parsear el JSON (debe ser un string de un array)
+let preguntas;
+
+try {
+    preguntas = JSON.parse(contenido);
+} catch (e) {
+    chat.innerHTML += `<div><strong>IA:</strong> Error al interpretar el JSON generado.</div>`;
+    console.error("JSON mal formado:", contenido);
+    return;
+}
+
+// Validación de que sea un array
+if (!Array.isArray(preguntas)) {
+    chat.innerHTML += `<div><strong>IA:</strong> Formato inesperado: no se recibió un array de preguntas.</div>`;
+    console.error('Esperaba un array, pero recibí:', preguntas);
+    return;
+}
+
 
         // 2) Valida que sí recibiste un array
         if (!Array.isArray(preguntas)) {
