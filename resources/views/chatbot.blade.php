@@ -38,8 +38,9 @@
             tema: tema
         })
         .then(function (response) {
+             console.log(response)
     const contenido = response.data.choices[0].message.content;
-    console.log(response)
+   
     let preguntas;
 
     try {
