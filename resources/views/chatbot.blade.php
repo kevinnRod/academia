@@ -38,6 +38,8 @@
             tema: tema
         })
          .then(function (response) {
+             console.log("Contenido crudo recibido:", response);
+
         // 1) Aquí “response.data” ya es directamente el arreglo de preguntas,
         //    NO tienes que ir a response.data.choices[...] ni extraer .message.content.
        let contenido = response.data.generation;
