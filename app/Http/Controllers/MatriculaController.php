@@ -370,8 +370,6 @@ public function edit($numMatricula)
 
 public function update(Request $request, $numMatricula)
 {
-    // dd($request->all());
-    // Validación de los datos
     $request->validate([
         'idtipociclo' => 'required',
         'idarea' => 'required',
@@ -389,79 +387,45 @@ public function update(Request $request, $numMatricula)
         'montoPago.*' => 'required_with:idpago.*|numeric',
         'idmediopago.*' => 'required_with:idpago.*|integer',
         'estadoPago.*' => 'required_with:idpago.*|in:pendiente,confirmado,cancelado',
-
         'rutaImagen.*' => 'nullable|image|mimes:jpeg,png|max:2048',
-        
     ]);
 
-    // Actualizar los datos de la matrícula
     $matricula = Matricula::findOrFail($numMatricula);
     $matricula->dniAlumno = $request->dniAlumno;
     $matricula->idaula = $request->idaula;
     $matricula->idciclo = $request->idciclo;
     $matricula->save();
 
-    // Actualizar los datos de los pagos existentes
     foreach ($request->idpago as $index => $idpago) {
         if ($idpago) {
-            // Buscar el pago por su ID
             $pago = Pago::findOrFail($idpago);
-
-            // Actualizar los campos del pago
-            $pago->nropago = $request->nropago[$index];
-            $pago->fecha = $request->fechaPago[$index];
-            $pago->monto = $request->montoPago[$index];
-            $pago->idmediopago = $request->idmediopago[$index];
-            $pago->estado = $request->estadoPago[$index]; // Actualizar el estado del pago
-
-            // Procesar la imagen del comprobante si se proporciona
-            if ($request->hasFile('rutaImagen.' . $index)) {
-                $file = $request->file('rutaImagen.' . $index);
-                $destinationPath = 'images/pagos/';
-                $filename = time() . '-' . $file->getClientOriginalName();
-                $uploadSuccess = $file->move($destinationPath, $filename);
-
-                if ($uploadSuccess) {
-                    // Verificar si hay una imagen anterior y eliminarla
-                    if ($pago->rutaImagen) {
-                        $oldFilePath = public_path($pago->rutaImagen);
-                        if (file_exists($oldFilePath)) {
-                            unlink($oldFilePath);
-                        }
-                    }
-                    // Actualizar la referencia de la imagen en la base de datos con la nueva ruta
-                    $pago->rutaImagen = $destinationPath . $filename;
-                }
-            }
-
-            $pago->save();
         } else {
-            // Crear un nuevo pago si idpago es null
             $pago = new Pago();
-            $pago->nropago = $request->nropago[$index];
-            $pago->fecha = $request->fechaPago[$index];
-            $pago->monto = $request->montoPago[$index];
-            $pago->idmediopago = $request->idmediopago[$index];
             $pago->numMatricula = $numMatricula;
-            $pago->estado = $request->estadoPago[$index]; // Establecer el estado del pago
-
-            // Procesar la imagen del comprobante si se proporciona
-            if ($request->hasFile('rutaImagen.' . $index)) {
-                $file = $request->file('rutaImagen.' . $index);
-                $destinationPath = 'images/pagos/';
-                $filename = time() . '-' . $file->getClientOriginalName();
-                $uploadSuccess = $file->move($destinationPath, $filename);
-
-                if ($uploadSuccess) {
-                    $pago->rutaImagen = $destinationPath . $filename;
-                }
-            }
-
-            $pago->save();
         }
+
+        $pago->nropago = $request->nropago[$index];
+        $pago->fecha = $request->fechaPago[$index];
+        $pago->monto = $request->montoPago[$index];
+        $pago->idmediopago = $request->idmediopago[$index];
+        $pago->estado = $request->estadoPago[$index];
+
+        if ($request->hasFile('rutaImagen.' . $index)) {
+            $file = $request->file('rutaImagen.' . $index);
+            $filename = 'pagos/' . time() . '-' . $file->getClientOriginalName();
+            Storage::disk('s3')->put($filename, file_get_contents($file));
+
+            // (Opcional) Eliminar imagen anterior si quieres manejarlo
+            // if ($pago->rutaImagen) {
+            //     Storage::disk('s3')->delete($pago->rutaImagen);
+            // }
+
+            $pago->rutaImagen = $filename;
+        }
+
+        $pago->save();
     }
 
-    // Actualizar los datos del alumno
     $alumno = Alumno::findOrFail($matricula->dniAlumno);
     $alumno->dniAlumno = $request->dniAlumno;
     $alumno->apellidos = $request->apellidosAlumno;
@@ -469,30 +433,24 @@ public function update(Request $request, $numMatricula)
     $alumno->fechaNacimiento = $request->fechaNacimiento;
     $alumno->idcarrera = $request->idcarrera;
 
-    // Procesar la nueva imagen del alumno si se proporciona
     if ($request->hasFile('featured')) {
         $file = $request->file('featured');
-        $destinationPath = 'images/alumnos/';
-        $filename = time() . '-' . $file->getClientOriginalName();
-        $uploadSuccess = $file->move($destinationPath, $filename);
+        $filename = 'alumnos/' . time() . '-' . $file->getClientOriginalName();
+        Storage::disk('s3')->put($filename, file_get_contents($file));
 
-        if ($uploadSuccess) {
-            // Verificar si hay una imagen anterior y eliminarla
-            if ($alumno->featured) {
-                $oldFilePath = public_path($alumno->featured);
-                if (file_exists($oldFilePath)) {
-                    unlink($oldFilePath);
-                }
-            }
-            // Actualizar la referencia de la imagen en la base de datos con la nueva ruta
-            $alumno->featured = $destinationPath . $filename;
-        }
+        // (Opcional) Eliminar imagen anterior si lo deseas
+        // if ($alumno->featured) {
+        //     Storage::disk('s3')->delete($alumno->featured);
+        // }
+
+        $alumno->featured = $filename;
     }
 
     $alumno->save();
 
     return redirect()->route('matriculas.index')->with('success', 'Matrícula y datos del alumno actualizados con éxito');
 }
+
 
 
 
