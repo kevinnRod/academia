@@ -33,7 +33,7 @@ class ExamenIAController extends Controller
         ];
 
         $result = $client->invokeModel([
-            'modelId' => env('AWS_BEDROCK_MODEL_ID'),
+            'modelId' => 'arn:aws:bedrock:us-east-2:950934979263:inference-profile/us.deepseek.r1-v1:0',
             'contentType' => 'application/json',
             'accept' => 'application/json',
             'body' => json_encode($body),
