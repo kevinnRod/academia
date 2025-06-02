@@ -29,96 +29,100 @@ use Illuminate\Support\Facades\Storage;
 class MatriculaController extends Controller
 {
     const PAGINATION = 10;
-
     public function index(Request $request)
-{
-    // Obtener los filtros de la solicitud
-    $idperiodo = $request->input('idperiodo');
-    $idtipociclo = $request->input('idtipociclo');
-    $idarea = $request->input('idarea');
-    $idciclo = $request->input('idciclo');
-    $idtipoexamen = $request->input('idtipoexamen');
-    $idaula = $request->input('idaula');
-    $buscarpor = $request->input('buscarpor'); // Buscar por DNI, nombre o apellidos
-
-    // Inicializar la consulta base
-    $query = Alumno::select(
-        'matriculas.numMatricula',
-        'alumnos.dniAlumno',
-        'alumnos.nombres',
-        'alumnos.apellidos',
-        'alumnos.fechaNacimiento',
-        'alumnos.featured',
-        'aula.descripcion as aula_descripcion',
-        'ciclo.descripcion as ciclo_descripcion',
-        'area.descripcion as area_descripcion',
-        'tipo_ciclo.descripcion as tipo_ciclo_descripcion',
-        'periodo.idperiodo',
-        'aula.idaula',
-        'matriculas.fechaMatricula',
-        'matriculas.horaMatricula'
-    )
-    ->join('matriculas', 'alumnos.dniAlumno', '=', 'matriculas.dniAlumno')
-    ->join('aula', 'matriculas.idaula', '=', 'aula.idaula')
-    ->join('ciclo', 'aula.idciclo', '=', 'ciclo.idciclo')
-    ->join('area', 'ciclo.idarea', '=', 'area.idarea')
-    ->join('tipo_ciclo', 'ciclo.idtipociclo', '=', 'tipo_ciclo.idtipociclo')
-    ->join('periodo', 'ciclo.idperiodo', '=', 'periodo.idperiodo')
-    ->where('matriculas.estado', 1)
-    ->distinct()
-    ->when($idperiodo, function ($query, $idperiodo) {
-        return $query->where('ciclo.idperiodo', $idperiodo);
-    })
-    ->when($idtipociclo, function ($query, $idtipociclo) {
-        return $query->where('ciclo.idtipociclo', $idtipociclo);
-    })
-    ->when($idarea, function ($query, $idarea) {
-        return $query->where('ciclo.idarea', $idarea);
-    })
-    ->when($idciclo, function ($query, $idciclo) {
-        return $query->where('ciclo.idciclo', $idciclo);
-    })
-    ->when($idaula, function ($query, $idaula) {
-        return $query->where('aula.idaula', $idaula);
-    })
-    ->when($buscarpor, function ($query, $buscarpor) {
-        return $query->where(function ($q) use ($buscarpor) {
-            $q->where('alumnos.dniAlumno', 'LIKE', "%$buscarpor%")
-              ->orWhere('alumnos.nombres', 'LIKE', "%$buscarpor%")
-              ->orWhere('alumnos.apellidos', 'LIKE', "%$buscarpor%");
-        });
-    })
-    ->orderBy('matriculas.fechaMatricula', 'desc')
-    ->orderBy('matriculas.horaMatricula', 'desc'); // Ordenar por fecha de matrícula en orden ascendente
-
-    // $reservaciones = $query->orderBy('fechaReservacion', 'desc')
-    //                             ->orderBy('horaReservacion', 'desc')
-    //                             ->paginate(10);
+    {
+        // Obtener filtros
+        $idperiodo = $request->input('idperiodo');
+        $idtipociclo = $request->input('idtipociclo');
+        $idarea = $request->input('idarea');
+        $idciclo = $request->input('idciclo');
+        $idtipoexamen = $request->input('idtipoexamen');
+        $idaula = $request->input('idaula');
+        $buscarpor = $request->input('buscarpor');
     
-    // Ejecutar la consulta con paginación
-    $matriculas = $query->paginate(20); // Ajusta el número de registros por página según sea necesario
-
-    // Obtener datos para los filtros
-    $periodos = Periodo::all()->where('estado', '=', 1);
-    $tiposCiclo = Tipo_Ciclo::all();
-    $areas = Area::all();
-    $ciclos = Ciclo::all();
-    $aulas = Aula::all();
-    $tiposExamen = Tipo_Examen::all(); // Asegúrate de usar este filtro si lo necesitas
-    $idperiodoSeleccionado = session('periodoSeleccionado');
-
-    return view('matriculas.index', [
-        'matriculas' => $matriculas,
-        'periodos' => $periodos,
-        'tiposCiclo' => $tiposCiclo,
-        'areas' => $areas,
-        'ciclos' => $ciclos,
-        'aulas' => $aulas,
-        'tiposExamen' => $tiposExamen,
-        'idperiodoSeleccionado' => $idperiodoSeleccionado,
-        'buscarpor' => $buscarpor // Agrega esto si necesitas mantener el término de búsqueda en la vista
-    ]);
-}
+        // Construcción de la consulta base
+        $query = Alumno::select(
+            'matriculas.numMatricula',
+            'alumnos.dniAlumno',
+            'alumnos.nombres',
+            'alumnos.apellidos',
+            'alumnos.fechaNacimiento',
+            'alumnos.featured',
+            'aula.descripcion as aula_descripcion',
+            'ciclo.descripcion as ciclo_descripcion',
+            'area.descripcion as area_descripcion',
+            'tipo_ciclo.descripcion as tipo_ciclo_descripcion',
+            'periodo.idperiodo',
+            'aula.idaula',
+            'matriculas.fechaMatricula',
+            'matriculas.horaMatricula'
+        )
+        ->join('matriculas', 'alumnos.dniAlumno', '=', 'matriculas.dniAlumno')
+        ->join('aula', 'matriculas.idaula', '=', 'aula.idaula')
+        ->join('ciclo', 'aula.idciclo', '=', 'ciclo.idciclo')
+        ->join('area', 'ciclo.idarea', '=', 'area.idarea')
+        ->join('tipo_ciclo', 'ciclo.idtipociclo', '=', 'tipo_ciclo.idtipociclo')
+        ->join('periodo', 'ciclo.idperiodo', '=', 'periodo.idperiodo')
+        ->where('matriculas.estado', 1)
+        ->distinct()
+        ->when($idperiodo, fn($q) => $q->where('ciclo.idperiodo', $idperiodo))
+        ->when($idtipociclo, fn($q) => $q->where('ciclo.idtipociclo', $idtipociclo))
+        ->when($idarea, fn($q) => $q->where('ciclo.idarea', $idarea))
+        ->when($idciclo, fn($q) => $q->where('ciclo.idciclo', $idciclo))
+        ->when($idaula, fn($q) => $q->where('aula.idaula', $idaula))
+        ->when($buscarpor, function ($q) use ($buscarpor) {
+            $q->where(function ($sub) use ($buscarpor) {
+                $sub->where('alumnos.dniAlumno', 'LIKE', "%$buscarpor%")
+                    ->orWhere('alumnos.nombres', 'LIKE', "%$buscarpor%")
+                    ->orWhere('alumnos.apellidos', 'LIKE', "%$buscarpor%");
+            });
+        })
+        ->orderBy('matriculas.fechaMatricula', 'desc')
+        ->orderBy('matriculas.horaMatricula', 'desc');
+    
+        // Obtener todos los registros y agregar URL temporal
+        $items = $query->get()->map(function ($item) {
+            if ($item->featured) {
+                $item->urlTemporal = Storage::disk('s3')->temporaryUrl(
+                    $item->featured,
+                    now()->addMinutes(15)
+                );
+            } else {
+                $item->urlTemporal = null;
+            }
+            return $item;
+        });
+    
+        // Paginación manual
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 20;
+        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $matriculas = new LengthAwarePaginator($currentItems, $items->count(), $perPage, $currentPage, [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+            'query' => $request->query(),
+        ]);
+    
+        // Datos para filtros
+        $periodos = Periodo::where('estado', 1)->get();
+        $tiposCiclo = Tipo_Ciclo::all();
+        $areas = Area::all();
+        $ciclos = Ciclo::all();
+        $aulas = Aula::all();
+        $tiposExamen = Tipo_Examen::all();
+        $idperiodoSeleccionado = session('periodoSeleccionado');
+    
+        return view('matriculas.index', [
+            'matriculas' => $matriculas,
+            'periodos' => $periodos,
+            'tiposCiclo' => $tiposCiclo,
+            'areas' => $areas,
+            'ciclos' => $ciclos,
+            'aulas' => $aulas,
+            'tiposExamen' => $tiposExamen,
+            'idperiodoSeleccionado' => $idperiodoSeleccionado,
+            'buscarpor' => $buscarpor
+        ]);
+    }
 
     
 

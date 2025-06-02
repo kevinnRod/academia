@@ -138,10 +138,15 @@
                                     <td>{{ $itemMatricula->area_descripcion }}</td>
                                     <td>{{ $itemMatricula->aula_descripcion }}</td>
                                     <td>
-                                        <a href="{{ asset($itemMatricula->featured) }}" data-fancybox="gallery" data-caption="Foto del alumno">
-                                            <img src="{{ asset($itemMatricula->featured) }}" alt="Foto del alumno" class="img-fluid" width="100px">
-                                        </a>
+                                        @if ($itemMatricula->urlTemporal)
+                                            <a href="{{ $itemMatricula->urlTemporal }}" data-fancybox="gallery" data-caption="Foto del alumno">
+                                                <img src="{{ $itemMatricula->urlTemporal }}" alt="Foto del alumno" class="img-fluid" width="100px">
+                                            </a>
+                                        @else
+                                            <span>Sin foto</span>
+                                        @endif
                                     </td>
+                                    
                                     <td>
                                         <a href="{{ route('matriculas.ficha.pdf', $itemMatricula->numMatricula) }}" target="_blank" class="btn btn-danger btn-sm">
                                             <i class="fas fa-print"></i> Imprimir
