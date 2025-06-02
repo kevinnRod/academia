@@ -13,7 +13,32 @@ class ExamenIAController extends Controller
         $tema  = $request->input('tema');
         $curso = $request->input('curso');
 
-        $prompt = "Genera 5 preguntas tipo alternativa para un examen del curso {$curso}, sobre el tema {$tema}, incluyendo la respuesta correcta y tres alternativas incorrectas. Devuelve las preguntas en un array JSON, cada objeto debe tener 'pregunta', 'opciones' y 'respuesta_correcta'.";
+       $prompt = "Devuélveme **solo** un arreglo JSON con 5 preguntas de opción múltiple para un examen. Cada elemento del arreglo debe ser un objeto con estas tres claves:
+1. "pregunta": El enunciado de la pregunta en español.2. "opciones": Un objeto con cuatro pares clave–valor, donde las claves sean "A", "B", "C" y "D", y los valores sean las cuatro alternativas en texto.  
+3. "respuesta_correcta": Una de las letras "A", "B", "C" o "D" indicando cuál de las opciones es la correcta. El tema del examen es "{$tema}" y el curso es "{$curso}". No agregues ningún texto antes ni después del JSON, solo el arreglo. Ejemplo de estructura de salida:
+[
+  {
+    "pregunta": "¿Cuál es la capital de Perú?",
+    "opciones": {
+      "A": "Lima",
+      "B": "Cusco",
+      "C": "Arequipa",
+      "D": "Trujillo"
+    },
+    "respuesta_correcta": "A"
+  },
+  {
+    "pregunta": "¿Qué órgano produce la insulina?",
+    "opciones": {
+      "A": "Hígado",
+      "B": "Páncreas",
+      "C": "Riñón",
+      "D": "Corazón"
+    },
+    "respuesta_correcta": "B"
+  },
+  …
+]";
 
         // Instancia el cliente de Bedrock
         $client = new BedrockRuntimeClient([
