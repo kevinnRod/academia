@@ -54,12 +54,16 @@ if (match && match[1]) {
     contenido = match[1];
 }
 contenido = contenido.replace(/^"""\s*|\s*"""$/g, '').trim();
-
+const matchArray = contenido.match(/\[[\s\S]+?\]/);
+        if (!matchArray) {
+            chat.innerHTML += `<div><strong>IA:</strong> <em>No se encontró un array JSON válido.</em></div>`;
+            return;
+        }
 // Intenta parsear el JSON (debe ser un string de un array)
 let preguntas;
 
 try {
-    preguntas = JSON.parse(contenido);
+    preguntas = JSON.parse(matchArray[0])
 } catch (e) {
     chat.innerHTML += `<div><strong>IA:</strong> Error al interpretar el JSON generado.</div>`;
     console.error("JSON mal formado:", contenido);
