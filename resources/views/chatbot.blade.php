@@ -65,50 +65,74 @@ function intentarParsearJSON(texto) {
             tema: tema
         })
          .then(function (response) {
-    console.log("Contenido crudo recibido:", response);
+             console.log("Contenido crudo recibido:", response);
 
-    let contenido = response.data.generation;
+        // 1) Aquí “response.data” ya es directamente el arreglo de preguntas,
+        //    NO tienes que ir a response.data.choices[...] ni extraer .message.content.
+       let contenido = response.data.generation;
 
-    // LIMPIA el contenido recibido
-    contenido = limpiarJsonGenerado(contenido);
+// Extrae el JSON desde el string, quitando print( y las comillas triples, si existen
+// Intenta detectar si hay un print( y extraer solo el contenido entre comillas
 
-    // INTENTA parsearlo como JSON
-    const resultado = intentarParsearJSON(contenido);
+const printRegex = /print\(['"`]([\s\S]*?)['"`]\)/;
+const match = contenido.match(jsonRegex);
 
-    if (!resultado.exito) {
-        chat.innerHTML += `<div><strong>IA:</strong> ${resultado.error}</div>`;
-        return;
-    }
+if (match && match[1]) {
+    contenido = match[1];
+}
+contenido = contenido.replace(/^"""\s*|\s*"""$/g, '').trim();
 
-    const preguntas = resultado.datos;
+// Intenta parsear el JSON (debe ser un string de un array)
+let preguntas;
 
-    // Valida que sea un array
-    if (!Array.isArray(preguntas)) {
-        chat.innerHTML += `<div><strong>IA:</strong> Formato inesperado: no se recibió un array de preguntas.</div>`;
-        console.error('Esperaba un array, pero recibí:', preguntas);
-        return;
-    }
+try {
+    preguntas = JSON.parse(contenido);
+} catch (e) {
+    chat.innerHTML += <div><strong>IA:</strong> Error al interpretar el JSON generado.</div>;
+    console.error("JSON mal formado:", contenido);
+    return;
+}
 
-    // Muestra el contenido formateado
-    let contenidoFormateado = '<strong>IA:</strong><br><br>';
-    preguntas.forEach((preguntaObj, index) => {
-        contenidoFormateado += `<strong>${index + 1}. ${preguntaObj.pregunta}</strong><br>`;
+// Validación de que sea un array
+if (!Array.isArray(preguntas)) {
+    chat.innerHTML += <div><strong>IA:</strong> Formato inesperado: no se recibió un array de preguntas.</div>;
+    console.error('Esperaba un array, pero recibí:', preguntas);
+    return;
+}
 
-        for (const letra in preguntaObj.opciones) {
-            if (preguntaObj.opciones.hasOwnProperty(letra)) {
-                contenidoFormateado += `${letra}) ${preguntaObj.opciones[letra]}<br>`;
-            }
+
+        // 2) Valida que sí recibiste un array
+        if (!Array.isArray(preguntas)) {
+            chat.innerHTML += <div><strong>IA:</strong> <em>Formato inesperado: no se recibió un array de preguntas.</em></div>;
+            console.error('Esperaba un array, pero recibí:', response.data);
+            return;
         }
 
-        contenidoFormateado += `<em>Respuesta correcta:</em> ${preguntaObj.respuesta_correcta}<br><br>`;
-    });
+        // 3) Recorre y formatea cada pregunta
+        let contenidoFormateado = '<strong>IA:</strong><br><br>';
+        preguntas.forEach((preguntaObj, index) => {
+            contenidoFormateado += <strong>${index + 1}. ${preguntaObj.pregunta}</strong><br>;
 
-    chat.innerHTML += `<div class="msg bot">${contenidoFormateado}</div>`;
-    chat.scrollTop = chat.scrollHeight;
-})
-.catch(function (error) {
-    chat.innerHTML += `<div><strong>IA:</strong> Ocurrió un error al generar preguntas.</div>`;
-    console.error(error);
-});
+            // Como “opciones” es un objeto { A: "...", B: "...", C: "...", D: "..." }
+            for (const letra in preguntaObj.opciones) {
+                if (preguntaObj.opciones.hasOwnProperty(letra)) {
+                    contenidoFormateado += ${letra}) ${preguntaObj.opciones[letra]}<br>;
+                }
+            }
+
+            contenidoFormateado += <em>Respuesta correcta:</em> ${preguntaObj.respuesta_correcta}<br><br>;
+        });
+
+        chat.innerHTML += <div class="msg bot">${contenidoFormateado}</div>;
+        chat.scrollTop = chat.scrollHeight;
+    })
+        .catch(function (error) {
+            chat.innerHTML += <div><strong>IA:</strong> Ocurrió un error al generar preguntas.</div>;
+            console.error(error); // Muestra el error completo en consola
+        });
+
+
+        chat.scrollTop = chat.scrollHeight;
+    });
 </script>
 @endsection
