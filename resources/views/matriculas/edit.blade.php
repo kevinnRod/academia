@@ -140,11 +140,10 @@
                         <div class="col form-group">
                             <label class="col-md-12 mb-0">Foto actual</label>
                             <div class="col-sm-12 border-bottom">
-                                @if ($matricula->alumno->featured)
-                                    <a href="{{ asset($matricula->alumno->featured) }}" class="fancybox" data-fancybox="gallery">
-                                        <img src="{{ asset($matricula->alumno->featured) }}" alt="Foto del alumno" class="img-fluid mt-2" width="200px">
-                                    </a>
+                                @if (!empty($alumno->urlFotoTemporal))
+                                    <img src="{{ $alumno->urlFotoTemporal }}" alt="Foto del alumno" width="200px">
                                 @endif
+
                             </div>
 
                         <div class="col form-group">
@@ -209,9 +208,11 @@
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Comprobante Actual</label>
                                 @if ($pago->urlTemporal)
-                                    <a href="{{ $pago->urlTemporal }}" class="fancybox" data-fancybox="gallery">
-                                        <img src="{{ $pago->urlTemporal }}" alt="Foto del comprobante" class="img-fluid mt-2" width="200px">
+                                    <a href="{{ $pago->urlTemporal }}" target="_blank">
+                                        <img src="{{ $pago->urlTemporal }}" width="200px">
                                     </a>
+                                @else
+                                    <p>Sin comprobante</p>
                                 @endif
 
                             </div>

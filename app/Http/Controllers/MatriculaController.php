@@ -204,14 +204,13 @@ class MatriculaController extends Controller
         // Procesar y guardar la foto del alumno si se proporciona
         if ($request->hasFile('featured')) {
             $file = $request->file('featured');
-            $destinationPath = 'images/featureds/';
-            $filename = time() . '-' . $file->getClientOriginalName();
-            $uploadSuccess = $file->move($destinationPath, $filename);
-            
-            // Verificar si la foto se cargó correctamente antes de guardar la ruta en la base de datos
-            if ($uploadSuccess) {
-                $alumno->featured = $destinationPath . $filename;
-            }
+            $filename = 'alumnos/' . time() . '-' . $file->getClientOriginalName();
+        
+            // Subir archivo de forma privada a S3
+            Storage::disk('s3')->put($filename, file_get_contents($file));
+        
+            // Guardar solo el path interno (no la URL)
+            $alumno->featured = $filename;
         }
         
         $alumno->save();
@@ -328,7 +327,7 @@ public function edit($numMatricula)
     $idperiodoSeleccionado = session('periodoSeleccionado');
     $mediopago = MedioPago::all();
 
-    // Obtener los pagos asociados a la matrícula
+    // Obtener los pagos asociados a la matrícula con URL temporal
     $pagos = $matricula->pagos->map(function ($pago) {
         if ($pago->rutaImagen) {
             $pago->urlTemporal = Storage::disk('s3')->temporaryUrl(
@@ -341,7 +340,15 @@ public function edit($numMatricula)
         return $pago;
     });
 
-    // Retornar la vista con los datos necesarios
+    // Obtener alumno y generar URL temporal de su foto
+    $alumno = $matricula->alumno;
+    if ($alumno && $alumno->featured) {
+        $alumno->urlFotoTemporal = Storage::disk('s3')->temporaryUrl(
+            $alumno->featured,
+            now()->addMinutes(15)
+        );
+    }
+
     return view('matriculas.edit', compact(
         'matricula',
         'periodos',
@@ -352,10 +359,10 @@ public function edit($numMatricula)
         'aulas',
         'idperiodoSeleccionado',
         'mediopago',
-        'pagos'
+        'pagos',
+        'alumno'
     ));
 }
-
 
 public function update(Request $request, $numMatricula)
 {
