@@ -54,13 +54,17 @@
     let contenidoFormateado = '<strong>IA:</strong><br><br>';
 
     preguntas.forEach((preguntaObj, index) => {
-        contenidoFormateado += `<strong>${index + 1}. ${preguntaObj.pregunta}</strong><br>`;
-        preguntaObj.opciones.forEach((opcion, i) => {
-            const letra = String.fromCharCode(65 + i); // A, B, C, D
-            contenidoFormateado += `${letra}) ${opcion}<br>`;
-        });
-        contenidoFormateado += `<em>Respuesta correcta:</em> ${preguntaObj.respuesta_correcta}<br><br>`;
-    });
+    contenidoFormateado += `<strong>${index + 1}. ${preguntaObj.pregunta}</strong><br>`;
+    
+    for (const letra in preguntaObj.opciones) {
+        if (preguntaObj.opciones.hasOwnProperty(letra)) {
+            contenidoFormateado += `${letra}) ${preguntaObj.opciones[letra]}<br>`;
+        }
+    }
+
+    contenidoFormateado += `<em>Respuesta correcta:</em> ${preguntaObj.respuesta_correcta}<br><br>`;
+});
+
 
     chat.innerHTML += `<div class="msg bot">${contenidoFormateado}</div>`;
     chat.scrollTop = chat.scrollHeight;
