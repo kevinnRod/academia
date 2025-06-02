@@ -16,7 +16,7 @@ class ExamenIAController extends Controller
     $prompt = "Genera 5 preguntas tipo alternativa para un examen del curso {$curso}, sobre el tema {$tema}, incluyendo la respuesta correcta y tres alternativas incorrectas. Devuelve las preguntas en un array JSON, cada objeto debe tener 'pregunta', 'opciones' y 'respuesta_correcta'.";
 
     $client = new BedrockRuntimeClient([
-        'region' => env('AWS_REGION'),
+        'region' => env('AWS_DEFAULT_REGION'),
         'version' => 'latest',
         'credentials' => [
             'key' => env('AWS_ACCESS_KEY_ID'),
