@@ -208,11 +208,12 @@
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Comprobante Actual</label>
-                                @if ($pago->rutaImagen)
-                                <a href="{{ asset($pago->rutaImagen) }}" class="fancybox" data-fancybox="gallery">
-                                    <img src="{{ asset($pago->rutaImagen) }}" alt="Foto del comprobante" class="img-fluid mt-2" width="200px">
-                                </a>
+                                @if ($pago->urlTemporal)
+                                    <a href="{{ $pago->urlTemporal }}" class="fancybox" data-fancybox="gallery">
+                                        <img src="{{ $pago->urlTemporal }}" alt="Foto del comprobante" class="img-fluid mt-2" width="200px">
+                                    </a>
                                 @endif
+
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="rutaImagen_{{ $index }}" class="form-label">Cambiar Foto de Comprobante</label>

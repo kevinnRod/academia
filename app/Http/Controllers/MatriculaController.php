@@ -327,11 +327,33 @@ public function edit($numMatricula)
     $aulas = Aula::all();
     $idperiodoSeleccionado = session('periodoSeleccionado');
     $mediopago = MedioPago::all();
+
     // Obtener los pagos asociados a la matrícula
-    $pagos = $matricula->pagos;
+    $pagos = $matricula->pagos->map(function ($pago) {
+        if ($pago->rutaImagen) {
+            $pago->urlTemporal = Storage::disk('s3')->temporaryUrl(
+                $pago->rutaImagen,
+                now()->addMinutes(15)
+            );
+        } else {
+            $pago->urlTemporal = null;
+        }
+        return $pago;
+    });
 
     // Retornar la vista con los datos necesarios
-    return view('matriculas.edit', compact('matricula', 'periodos', 'tiposCiclo', 'areas', 'carreras', 'ciclos', 'aulas', 'idperiodoSeleccionado', 'mediopago', 'pagos'));
+    return view('matriculas.edit', compact(
+        'matricula',
+        'periodos',
+        'tiposCiclo',
+        'areas',
+        'carreras',
+        'ciclos',
+        'aulas',
+        'idperiodoSeleccionado',
+        'mediopago',
+        'pagos'
+    ));
 }
 
 
