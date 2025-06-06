@@ -166,7 +166,6 @@ class MatriculaController extends Controller
 
     public function store(Request $request)
 {
-    // Validar los datos del formulario de matrícula
     $data = $request->validate([
         'idperiodo'=> 'required',
         'idaula' => 'required',
@@ -193,48 +192,40 @@ class MatriculaController extends Controller
         'featured.max' => 'El tamaño máximo de la imagen es de 2MB',
     ]);
 
-    // Verificar si el alumno ya existe en la base de datos
     $alumnoExistente = Alumno::where('dniAlumno', $request->dniAlumno)->first();
 
     if (!$alumnoExistente) {
-        // Si el alumno no existe, creamos un nuevo registro
         $alumno = new Alumno();
         $alumno->dniAlumno = $request->dniAlumno;
         $alumno->apellidos = $request->apellidosAlumno;
         $alumno->nombres = $request->nombresAlumno;
-        $alumno->edad = Carbon::parse($request->fechaNacimiento)->age; // Calcular la edad
-        $alumno->dniApoderado = '12444444'; // DNI del apoderado por defecto
+        $alumno->edad = Carbon::parse($request->fechaNacimiento)->age; 
+        $alumno->dniApoderado = '12444444'; 
         $alumno->estado = '1';
         $alumno->fechaNacimiento = $request->fechaNacimiento;
         $alumno->idcarrera = $request->idcarrera;
-        // Procesar y guardar la foto del alumno si se proporciona
         if ($request->hasFile('featured')) {
             $file = $request->file('featured');
             $filename = 'alumnos/' . time() . '-' . $file->getClientOriginalName();
         
-            // Subir archivo de forma privada a S3
             Storage::disk('s3')->put($filename, file_get_contents($file));
         
-            // Guardar solo el path interno (no la URL)
             $alumno->featured = $filename;
         }
         
         $alumno->save();
     } else {
-        // Si el alumno ya existe, simplemente utilizamos el alumno existente
         $alumno = $alumnoExistente;
     }
 
 
-    // Crear una nueva matrícula
     $matricula = new Matricula();
-    $matricula->fechaMatricula = now()->toDateString(); // Fecha actual
-    $matricula->horaMatricula = now()->toTimeString(); // Hora actual
+    $matricula->fechaMatricula = now()->toDateString();
+    $matricula->horaMatricula = now()->toTimeString(); 
     $matricula->idciclo = $request->idciclo;
     $matricula->dniAlumno = $request->dniAlumno;
-    $matricula->idaula = $request->idaula; // Guardar el aula seleccionado
-    $matricula->estado = '1'; // Definir el estado de la matrícula
-    // $matricula->idpago = $pago->idpago; // Relacionar la matrícula con el pago
+    $matricula->idaula = $request->idaula;
+    $matricula->estado = '1'; 
 
     $matricula->save();
     
@@ -250,20 +241,17 @@ class MatriculaController extends Controller
         $file = $request->file('rutaImagen');
         $filename = 'pagos/' . time() . '-' . $file->getClientOriginalName();
     
-        // Subida privada (sin opción 'public')
         Storage::disk('s3')->put($filename, file_get_contents($file));
     
-        // Guarda la ruta en BD (sin URL)
         $pago->rutaImagen = $filename;
     }
 
 
-    $pago->estado = 'Pendiente'; // o el estado que corresponda
+    $pago->estado = 'Pendiente';
     $pago->save();
 
 
 
-    // Obtener los tiempos de inicio y fin
     $startTime = new \DateTime(session('start_time'));
     $endTime = new \DateTime();
 
@@ -417,11 +405,6 @@ public function update(Request $request, $numMatricula)
             $filename = 'pagos/' . time() . '-' . $file->getClientOriginalName();
             Storage::disk('s3')->put($filename, file_get_contents($file));
 
-            // (Opcional) Eliminar imagen anterior si quieres manejarlo
-            // if ($pago->rutaImagen) {
-            //     Storage::disk('s3')->delete($pago->rutaImagen);
-            // }
-
             $pago->rutaImagen = $filename;
         }
 
@@ -439,11 +422,6 @@ public function update(Request $request, $numMatricula)
         $file = $request->file('featured');
         $filename = 'alumnos/' . time() . '-' . $file->getClientOriginalName();
         Storage::disk('s3')->put($filename, file_get_contents($file));
-
-        // (Opcional) Eliminar imagen anterior si lo deseas
-        // if ($alumno->featured) {
-        //     Storage::disk('s3')->delete($alumno->featured);
-        // }
 
         $alumno->featured = $filename;
     }
